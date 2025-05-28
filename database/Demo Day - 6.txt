@@ -1,0 +1,190 @@
+-group by
+-having												
+-subquery
+-acid properties
+
+select depno,sum(sal)
+from emp
+group by depno;
+
+
+select deptno,sum(sal)
+from emp
+group by deptno
+order by deptno;
+
+-list max sal for each job
+select job,max(sal)
+from emp 
+group by job;
+
+-display all jobs with max(sal)>2500
+select job,max(sal)
+from emp 
+group by job
+having max(sal)>2500;
+
+--display depts in which there are more than 1 clerk
+select deptno,count(*)
+from emp
+where job='clerk'
+group by deptno
+having count(*)>1;
+      
++--------+----------+
+| deptno | count(*) |
++--------+----------+
+|     20 |        2 |
++--------+----------+
+1 row in set (0.00 sec)
+
+select job,deptno,count(*)
+from emp
+where job='clerk'
+group by deptno
+having count(*)>1;
++-------+--------+----------+
+| job   | deptno | count(*) |
++-------+--------+----------+
+| CLERK |     20 |        2 |
++-------+--------+----------+
+1 row in set (0.00 sec)
+
+--display count of all jobs 
+select job,count(*)
+from emp
+group by job;
+
+
+select job,count(*)
+from emp
+where depno=20
+group by job;
+
+select job,count(*)
+from emp
+where deptno=20
+group by job
+having count(*)>5;
+
+select year(hiredate),count(*) 
+from emp
+group by year(hiredate);
+--------------------------------------
+subquery(nested query)
+
+select subqueries
+-display all emps earning sal > allen
+select *
+from emp
+where sal>(select sal 
+           from emp
+           where ename='allen');
+
+-disp all emps earning sal > avg sal 
+
+select * 
+from emp
+where sal> (select avg(sal)
+            from emp);
+
+-dis all emps earning sal as that of allen or <scott
+
+select *
+from emp
+where sal = (select sal
+              from emp where ename in('allen','scott'));
+
+ERROR 1242 (21000): Subquery returns more than 1 row
+
+select *
+from emp
+where sal in (select sal
+              from emp where ename in('allen','scott'));
+
+
+subquery for insert
+create table new_dept
+as
+  select * 
+  from dept
+  where 1=2;
+
+insert into new_dept
+(select * 
+ from dept);
+
+subquery for delete
+DELETE 
+from emp5
+where deptno=(select deptno
+	      from emp5
+              where ename='king');
+ERROR 1093 (HY000): You can't specify target table 'emp5' for update in FROM 
+clause
+
+delete 
+from emp5
+where deptno=(select deptno
+              from(select deptno
+	           from emp5
+                   where ename='king')tmp );
+
+subquery for update
+
+-increase sal 2000 fro all emps working in Turner's dept
+
+update emp5
+set sal=sal +2000
+where deptno=(select deptno
+              from emp5
+              where ename='turner');
+
+ERROR 1093 (HY000): You can't specify target table 'emp5' for update in FROM clause
+
+update emp5
+set sal=sal +2000
+where deptno=(select deptno
+              from(select deptno  
+                    from emp5
+                    where ename='turner'
+                   )y
+              );
+
+------------------------------
+
+handling nulls
+
+create table sample
+(eno int auto_increment,
+ ename varchar(15),
+ job varchar(15),
+ primary key(eno));
+
+insert into sample(ename,job)
+values('Amit',null),('smith','HC'),('Smita','analyst'),('Sujay','salesman')
+
+--promot all emps to manager except analyst and HC
+update sample
+set job='manager'
+where job not in ('HC','analyst');
+
+update sample
+set job='manager'
+where job not in ('HC','analyst') or job is null;
+
+
+
+
+
+
+
+ALTER TABLE emp RENAME COLUMN DETNO TO DEPTNO;
+
+
+
+
+
+
+
+

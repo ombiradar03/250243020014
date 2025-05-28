@@ -1,0 +1,234 @@
+select *
+from emp
+where deptno in (select deptno
+                  from dept);
+
+select *
+from emp
+where deptno not in (select deptno
+                  from dept);
+
+--list all emps to whome deptno correct deptno is not assigned
+select *
+from emp
+where deptno not in (select deptno
+                     from dept)
+or deptno is null;
+
+
+--
+
+select *
+from dept
+where deptno in (select deptno      
+                  from emp);
+10,20,30,50,null
+--depts to which there no employee working
+
+select *
+from dept
+where deptno not in (select deptno
+                     from emp
+                     where deptno is not null);
+
+--------------------------------------------------------
+correlated queries
+
+--list all emps earning sal> avg sal
+select *
+from emp
+where sal>(select avg(sal)
+           from emp);
+
+--list all emps earning sal > avg sal of the dept in which they work
+select *
+from emp e1
+where e1.sal>(select avg(e2.sal)
+              from emp e2
+              where e1.deptno=e2.deptno);
+
+Exists and not exists operator
+--list all 
+select *
+from dept d1
+where exists(select e1.deptno
+             from emp e1
+             where e1.deptno = d1.deptno);
+
+mysql> select *
+    -> from dept d1
+    -> where exists(select e1.deptno
+    ->              from emp e1
+    ->              where e1.deptno = d1.deptno);
++--------+------------+----------+
+| DEPTNO | DNAME      | LOC      |
++--------+------------+----------+
+|     10 | ACCOUNTING | NEW YORK |
+|     20 | RESEARCH   | DALLAS   |
+|     30 | SALES      | CHICAGO  |
++--------+------------+----------+
+3 rows in set (0.00 sec)
+
+select *
+from dept
+where deptno in (select deptno 
+                 from emp);
+
++--------+------------+----------+
+| DEPTNO | DNAME      | LOC      |
++--------+------------+----------+
+|     10 | ACCOUNTING | NEW YORK |
+|     20 | RESEARCH   | DALLAS   |
+|     30 | SALES      | CHICAGO  |
++--------+------------+----------+
+3 rows in set (0.00 sec)
+
+--list dept in which no employee is working
+select *
+from dept d1
+where not exists(select e1.deptno
+             from emp e1
+             where e1.deptno = d1.deptno);
+
+     
++--------+------------+--------+
+| DEPTNO | DNAME      | LOC    |
++--------+------------+--------+
+|     40 | OPERATIONS | BOSTON |
++--------+------------+--------+
+1 row in set (0.00 sec)
+
+select *
+from dept
+where deptno not in (select deptno 
+                 from emp
+                 where deptno is not null);
+-------------------------------------------------
+
+IMP
+
+display second highest sal
+
+select max(sal)
+from emp 
+where sal not in (select max(sal)
+                  from emp);
+
+display 4th highest sal
+
+select * 
+from emp e1 
+where 3 = (select count(distinct e2.sal)
+           from emp e2
+           where e2.sal > e1.sal);
+
+display 5th highest sal
+
+select * 
+from emp e1 
+where 4 = (select count(distinct e2.sal)
+           from emp e2
+           where e2.sal > e1.sal);
+----------------------------------
+partition by clause
+
+select job,max(sal),ename
+from emp
+group by job;
+
+ERROR 1055 (42000): Expression #3 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'knowit.emp.ENAME' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+
+
+over() function
+
+select max(sal) over()
+from emp;
+
+select ename,sal,job,max(sal) over(partition by job) "max sal jobwise",
+min(sal) over(partition by job) "min sal jobwise"
+from emp;
+
+
+select ename,sal,job,max(sal) over(partition by job) "max sal jobwise",
+deptno,min(sal) over(partition by deptno) "min sal dept"
+from emp;
+========================================
+Joins in RDBMS
+
+cross join
+----------------
+select e.empno,e.ename,e.deptno,d.dname
+from emp e
+join dept d;
+
+inner equi join
+-----------------
+select e.empno,e.ename,e.deptno,d.deptno,d.dname
+from emp e
+join dept d
+on e.deptno =d.deptno;
+
+inner non equi join
+-------------------
+select e.empno,e.ename,e.deptno,e.sal,s.grade
+from emp e
+join salgrade s
+on e.sal between s.losal and s.hisal;
+
+self join
+----------
+select e.empno,e.ename,e.mgr,m.ename
+from emp e
+join emp m
+on e.mgr=m.empno;
+
+left outer join
+----------------
+select e.empno,e.ename,e.deptno,d.deptno,d.dname
+from emp e
+left join dept d
+on e.deptno =d.deptno;
+
+insert into emp(empno,ename,deptno)
+values(1111,'Amit',50),(2222,'Ajay',60);
+
+insert into dept(deptno,dname)
+values(100,'Training'),(110,'Mkt');
+
+right outer join
+------------------
+select e.empno,e.ename,e.deptno,d.deptno,d.dname
+from emp e
+right join dept d
+on e.deptno =d.deptno;
+
+full join
+---------
+select e.empno,e.ename,e.deptno,d.deptno,d.dname
+from emp e
+left join dept d
+on e.deptno =d.deptno
+union
+select e.empno,e.ename,e.deptno,d.deptno,d.dname
+from emp e
+right join dept d
+on e.deptno =d.deptno;
+========================================
+empno,ename,deptno,dname,sal,grade
+
+select e.empno,e.ename,e.deptno,d.deptno,d.dname,e.sal,s.grade
+from emp e
+join dept d
+on e.deptno=d.deptno
+join salgrade s
+on e.sal between s.losal and s.hisal;
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,254 @@
+delimiter //
+create procedure prime1(no int)
+begin
+  declare i int default 2;
+  declare p int;
+  declare flag int default 1;
+  while i<no
+  do
+    set p=no%i;
+    if p=0
+    then
+      set flag=0;
+      break;
+    end if;
+    set i=i+1;
+  end while;
+  if flag=1
+  then 
+    select 'prime no.';
+  else
+    select 'not prime'; 
+  end if;
+end //
+delimiter ;
+
+--------------------------------
+
+inout parameter on procedure
+
+--pass deptno to proc and display max(sal) of that dept out of procedure
+
+delimiter //
+create procedure inout_proc(inout a decimal(7,2))
+begin
+  select max(sal) into a 
+  from emp
+  where deptno=a;
+end //
+delimiter ;
+
+>set @p=20;
+>call inout_proc(@p);
+>select @p;
+
+mysql> set @p=20;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call inout_proc(@p);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @p;
++---------+
+| @p      |
++---------+
+| 3000.00 |
++---------+
+1 row in set (0.00 sec)
+
+------------------------------
+set global log_bin_trust_function_creators=1;
+
+delimiter //
+create function email(a varchar(15),b varchar(15),c int) returns varchar(20)
+begin
+  declare txt varchar(20);
+  set txt = concat(lower(substr(a,1,2)),lower(substr(b,-2,2)),c,'@knowit.com');
+  return txt;
+end //
+delimiter ;
+
+
+select ename,job,deptno,email(ename,job,deptno)mail
+from emp;
+
+========================================
+cursors in MySQL
+
+delimiter //
+drop procedure if exists test_cursor1;
+create procedure test_cursor1()
+begin
+  declare a varchar(15);
+  declare b int;
+  declare c varchar(15);
+  declare cur cursor for
+     select e.ename,e.deptno,d.dname
+     from emp e
+     join dept d
+     on e.deptno=d.deptno;
+  open cur;
+  fetch cur into a,b,c;
+  select a,b,c;
+  close cur;
+end //
+delimiter ;
+
+-------------------------------
+handling multiple values
+delimiter //
+drop procedure if exists test_cursor2;
+create procedure test_cursor2()
+begin
+  declare a varchar(15);
+  declare b int;
+  declare c varchar(15);
+  declare flag int default 0;
+  declare cur cursor for
+     select e.ename,e.deptno,d.dname
+     from emp e
+     join dept d
+     on e.deptno=d.deptno;
+  declare continue handler for NOT FOUND
+     set flag=1;
+  open cur;
+  x:loop
+    fetch cur into a,b,c;
+    
+    if flag=1
+    then 
+       leave x;
+    end if;
+   select a,b,c;
+  end loop x;
+ close cur;
+end //
+delimiter ;
+
+=======================================
+Triggers in MySQL
+
+--before insert
+
+create table emp_wage
+(eno int primary key auto_increment,
+ ename varchar(15),
+ sal int,
+ comm int
+);
+
+insert into emp_wage(ename,sal,comm)
+values('sumit',1200,300);
+
+delimiter //
+create trigger insert_wage
+before insert
+on emp_wage
+for each row
+begin
+  if new.comm<400
+  then 
+    set new.comm=400;
+  end if;
+end //
+delimiter ;
+
+insert into emp_wage2(ename,sal,comm)
+values('Geeta',2200,300);
+
+before delete
+
+create table emp_log
+(empno int,
+ ename varchar(15),
+ deptno int,
+ job varchar(15)
+);
+
+delimiter //
+create trigger after_delete_emp
+before delete
+on emp
+for each row
+begin
+  insert into emp_log
+  values(old.empno,old.ename,old.deptno,old.job);
+end //  
+delimiter ; 
+
+----
+before update
+
+create table old_data
+(empno int,
+ ename varchar(15),
+ dt date,
+ old_job varchar(15),
+ new_job varchar(15),
+ old_sal decimal(7,2),
+ new_sal decimal(7,2) 
+);
+delimiter //
+create trigger abc
+before update
+on emp
+for each row
+begin
+   insert into old_data 
+   values(old.empno,old.ename,curdate(),old.job,new.job,old.sal,new.sal);
+end //
+delimiter ;
+
+update emp
+set sal=20000,job='HeadClk'
+where ename='adams';
+
+update emp
+set sal=25000 
+where ename='martin';
+
+mysql> update emp
+    -> set sal=20000,job='HeadClk'
+    -> where ename='adams';
+Query OK, 0 rows affected (0.01 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql>
+mysql> update emp
+    -> set sal=25000
+    -> where ename='martin';
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql> select * from old_data;
++-------+--------+------------+----------+----------+----------+----------+
+| empno | ename  | dt         | old_job  | new_job  | old_sal  | new_sal  |
++-------+--------+------------+----------+----------+----------+----------+
+|  7876 | ADAMS  | 2025-04-10 | HeadClk  | HeadClk  | 20000.00 | 20000.00 |
+|  7654 | MARTIN | 2025-04-10 | SALESMAN | SALESMAN | 25000.00 | 25000.00 |
++-------+--------+------------+----------+----------+----------+----------+
+2 rows in set (0.00 sec)
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

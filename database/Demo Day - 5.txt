@@ -1,0 +1,89 @@
+-adding constraints on existing tables
+-on delete set null / cascade
+ on update set null / cascade
+
+on delete set null
+
+create table dept10
+(dno int,
+ dname varchar(10),
+ constraint pk_dno primary key(dno));
+
+insert into dept10 
+values(10,'Sales'),(20,'Pur'),(30,'Mkt'),(40,'Acc');
+
+create table emp11
+(eno int auto_increment,
+ ename varchar(15),
+ deptno int,
+ constraint pk_eno primary key(eno),
+ constraint fk_deptno foreign key(deptno) references dept10(dno) on delete set null
+);
+
+insert into emp11(ename,deptno)
+values('Ajay',10),('Amit',20),('Smita',10),('Sarika',30),('sumit',20);
+
+delete 
+from dept10 
+where dno=10;
+--------------------------------------
+on delete cascade
+
+create table emp10
+(eno int auto_increment,
+ ename varchar(15),
+ deptno int,
+ constraint pk_eno primary key(eno),
+ constraint fk_deptno foreign key(deptno) references dept10(dno) on delete cascade  
+);
+
+insert into emp10(ename,deptno)
+values('Ajay',10),('Amit',20),('Smita',10),('Sarika',30),('sumit',20);
+
+delete 
+from dept10 
+where dno=20;
+
+---------------------------------------------------
+on update set null
+
+create table dept10
+(dno int,
+ dname varchar(10),
+ constraint pk_dno primary key(dno));
+
+insert into dept10 
+values(10,'Sales'),(20,'Pur'),(30,'Mkt'),(40,'Acc');
+
+create table emp10
+(eno int auto_increment,
+ ename varchar(15),
+ deptno int,
+ constraint pk_eno primary key(eno),
+ constraint fk_deptno foreign key(deptno) references dept10(dno) on update set null
+);
+
+insert into emp10(ename,deptno)
+values('Ajay',10),('Amit',20),('Smita',10),('Sarika',30),('sumit',20);
+
+on update cascade
+
+create table dept10
+(dno int,
+ dname varchar(10),
+ constraint pk_dno primary key(dno));
+
+insert into dept10 
+values(10,'Sales'),(20,'Pur'),(30,'Mkt'),(40,'Acc');
+
+create table emp10
+(eno int auto_increment,
+ ename varchar(15),
+ deptno int,
+ constraint pk_eno primary key(eno),
+ constraint fk_deptno foreign key(deptno) references dept10(dno) on update cascade
+);
+
+insert into emp10(ename,deptno)
+values('Ajay',10),('Amit',20),('Smita',10),('Sarika',30),('sumit',20);
+

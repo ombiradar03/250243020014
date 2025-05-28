@@ -1,0 +1,151 @@
+Views in RDBMS
+---------------
+-virtual tables
+
+create view v1
+as
+  select empno "Employee Id",ename Name,deptno Department,sal Salary
+  from emp;
+
+insert into v1
+values(2222,'Raj',30,1000);
+
+delete 
+from v1
+where name='Ajay';
+
+create view v2
+as
+  select e.ename,e.deptno,d.dname
+  from emp e
+  join dept d
+  on e.deptno=d.deptno;
+
+create view v3
+as
+  select empno,ename,deptno
+  from emp
+  where deptno=20;
+
+insert into v3
+values(9999,'Geeta',20);
+
+insert into v3
+values(5555,'Seeta',30);
+
+with check option constraint
+
+create view v4
+as
+  select empno,ename,deptno
+  from emp
+  where deptno=20
+with check option;
+
+insert into v4
+values(6666,'Neeta',10);
+
+-----------------------------------------
+Stored procedures in MySQL
+
+--inserting new row in the table
+delimiter //
+drop procedure if exists insert_data;
+create procedure insert_data()
+begin
+  insert into dept
+  values(80,'Training','Pune');
+  select * from dept;
+  update dept
+  set deptno=100 
+  where deptno=80;
+end //
+delimiter ;
+
+--write a procedure to display empno,ename,deptno and dnme
+
+delimiter //
+create procedure display1()
+begin
+  select e.empno,e.ename,e.deptno,d.dname
+  from emp e
+  join dept d
+  on e.deptno=d.deptno;
+end //
+
+--pass deptno and find avg(sal)
+
+delimiter //
+create procedure display2(in x int)
+begin
+  select avg(sal)
+  from emp
+  where deptno=x;
+end //
+delimiter ;
+
+mysql> call display2(10);
+
+mysql> set @p=20;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call display2(@p);
++-------------+
+| avg(sal)    |
++-------------+
+| 2175.000000 |
++-------------+
+1 row in set (0.00 sec)
+
+--send job to proc and displ max(sal)
+of job out of proc
+
+delimiter //
+create procedure display_max(in a varchar(15),out x decimal(7,2))
+begin
+  select max(sal) into x
+  from emp
+  where job=a;
+end //
+delimiter ;
+
+mysql> call display_max('clerk',@k);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @k;
++---------+
+| @k      |
++---------+
+| 1300.00 |
++---------+
+1 row in set (0.00 sec)
+
+mysql> set @p='manager';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call display_max(@p,@k);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @k;
++---------+
+| @k      |
++---------+
+| 2975.00 |
++---------+
+1 row in set (0.00 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
